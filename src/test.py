@@ -9,9 +9,16 @@ def stream_video():
     picam.configure("preview")
     picam.start()
 
+    frame_count = 0
     while True:
         frame = picam.capture_array()
         cv2.imshow("picam", frame)
+        if cv2.waitKey(1) & 0xFF == ord('s'):
+            filename = f"frame_{frame_count}.jpg"
+            cv2.imwrite(filename,frame)
+            print(f"Saved: {filename}")
+            frame_count += 1
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     cv2.destroyAllWindows()
