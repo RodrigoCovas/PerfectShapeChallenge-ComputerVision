@@ -1,12 +1,11 @@
 from typing import List
 import numpy as np
-import imageio
 import cv2
-import copy
 import glob
 import os
-from os.path import dirname, join
 from camera_calibrator import show_image
+from utils import non_max_suppression
+from camera_calibrator import load_images
 
 def gaussian_blur(img: np.array, sigma: float, filter_shape: None = None, verbose: bool = False) -> np.array:
     # TODO If not given, compute the filter shape 
@@ -74,31 +73,44 @@ def canny_edge_detector(img: np.array, sobel_filter: np.array, gauss_sigma: floa
         
     return canny_edges_img
 
-gauss_sigma = 3
-gb_imgs = [gaussian_blur(img, gauss_sigma, verbose=False) for img in imgs]
-show_image(gb_imgs[0][1])
+if __name__ == "__main__":
+    imgs_path= []
+    current_directory = os.getcwd()
+    parent_directory = os.path.dirname(current_directory)
+    #folder = os.path.join(current_directory,"data","Chessboard")
+    folder = os.path.join(current_directory,"data")
+    folder = folder.replace("\\", "/") + "/"
+    for filename in glob.glob(folder+ "*.*"):
+        print(filename)
+        imgs_path.append(filename)
+    imgs= load_images(imgs_path)
+    print(len(imgs))
 
-# TODO Define a sigma value
-gauss_sigma = 3
+    gauss_sigma = 3
+    gb_imgs = [gaussian_blur(img, gauss_sigma, verbose=False) for img in imgs]
+    show_image(gb_imgs[0][1])
 
-# TODO Define the Sobel filter
-sobel_filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    # TODO Define a sigma value
+    gauss_sigma = 3
 
-# TODO Get the edges detected by Sobel using a list comprehension
-sobel_edges_imgs = [sobel_edge_detector(img, sobel_filter, gauss_sigma, verbose=False) for img in imgs]
-for i in range(len(sobel_edges_imgs)):
-    show_image(sobel_edges_imgs[i][0], f"Edges: {i}")
+    # TODO Define the Sobel filter
+    sobel_filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
 
-# TODO Define Sobel filter
-sobel_filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+    # TODO Get the edges detected by Sobel using a list comprehension
+    sobel_edges_imgs = [sobel_edge_detector(img, sobel_filter, gauss_sigma, verbose=False) for img in imgs]
+    for i in range(len(sobel_edges_imgs)):
+        show_image(sobel_edges_imgs[i][0], f"Edges: {i}")
 
-# TODO Define a sigma value for Gauss
-gauss_sigma = 1
+    # TODO Define Sobel filter
+    sobel_filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
 
-# TODO Define a Gauss filter shape
-gauss_filter_shape = [3, 3]
+    # TODO Define a sigma value for Gauss
+    gauss_sigma = 1
 
-# TODO Get the edges detected by Canny using a list comprehension
-canny_edges_imgs = [canny_edge_detector(img, sobel_filter, gauss_sigma, gauss_filter_shape, verbose=False) for img in imgs]
-for i in range(len(canny_edges_imgs)):
-    show_image(canny_edges_imgs[i], f"Canny Edges: {i}")
+    # TODO Define a Gauss filter shape
+    gauss_filter_shape = [3, 3]
+
+    # TODO Get the edges detected by Canny using a list comprehension
+    canny_edges_imgs = [canny_edge_detector(img, sobel_filter, gauss_sigma, gauss_filter_shape, verbose=False) for img in imgs]
+    for i in range(len(canny_edges_imgs)):
+        show_image(canny_edges_imgs[i], f"Canny Edges: {i}")
