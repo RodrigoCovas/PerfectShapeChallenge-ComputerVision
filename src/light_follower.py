@@ -61,7 +61,7 @@ def calcular_semejanza(puntos_originales, puntos_circulo, radio):
     desviacion_distancia = np.std(distancias)
 
     #Calculamos la semejanza
-    semejanza = 1 / (1 + media_distancia/((radio**3)/500))
+    semejanza = 1 / (1 + media_distancia/((radio**3)/200))
 
     return semejanza, puntos_unidos
 
@@ -194,8 +194,6 @@ if __name__ == "__main__":
                     break
                 #Eliminar puntos duplicados o muy parecidos
                 tracking_positions = [tracking_positions[i] for i in range(len(tracking_positions)) if i == 0 or euclidean_distance(tracking_positions[i], tracking_positions[i-1]) > 3]
-                for i in range(len(tracking_positions)):
-                    tracking_positions[i] = (tracking_positions[i][0], abs(tracking_positions[i][1]-479))
                 print("Posiciones registradas: ", tracking_positions)
                 print("Número de posiciones registradas: ", len(tracking_positions))
 
