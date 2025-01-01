@@ -3,9 +3,15 @@ import numpy as np
 import cv2
 import glob
 import os
-from camera_calibrator import show_image
 from utils import non_max_suppression
-from camera_calibrator import load_images
+
+def load_images(filenames: List) -> List:
+    return [cv2.imread(filename) for filename in filenames]
+
+def show_image(img: np.array, title: str = 'Image'):
+    cv2.imshow(title, img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 def gaussian_blur(img: np.array, sigma: float, filter_shape: None = None, verbose: bool = False) -> np.array:
     # TODO If not given, compute the filter shape 
@@ -80,7 +86,7 @@ if __name__ == "__main__":
     #folder = os.path.join(current_directory,"data","Chessboard")
     folder = os.path.join(current_directory,"data")
     folder = folder.replace("\\", "/") + "/"
-    for filename in glob.glob(folder+ "*.*"):
+    for filename in glob.glob(folder+ "prueba1.jpg"):
         print(filename)
         imgs_path.append(filename)
     imgs= load_images(imgs_path)
@@ -114,3 +120,26 @@ if __name__ == "__main__":
     canny_edges_imgs = [canny_edge_detector(img, sobel_filter, gauss_sigma, gauss_filter_shape, verbose=False) for img in imgs]
     for i in range(len(canny_edges_imgs)):
         show_image(canny_edges_imgs[i], f"Canny Edges: {i}")
+    
+    imagen_gris = cv2.cvtColor(canny_edges_imgs[0], cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
+
+    # Aplicar suavizado para reducir ruido
+    imagen_gris = cv2.GaussianBlur(imagen_gris, (9, 9), 2)
+
+    # Detectar círculos utilizando la transformación de Hough
+    circulos = cv2.HoughCircles(
+        imagen_gris,
+        cv2.HOUGH_GRADIENT,
+        dp=1,
+        minDist=20,
+        param1=50,
+        param2=30,
+        minRadius=10,
+        maxRadius=100
+    )
+
+    # Verificar si se detectaron círculos
+    if circulos is not None:
+        print("Se ha detectado al menos un círculo.")
+    else:
+        print("No se detectaron círculos.")
