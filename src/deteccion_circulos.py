@@ -9,11 +9,11 @@ def load_images(filenames):
 
 # Cargar la imagen
 imgs_path= []
-current_directory = os.getcwd()
+current_directory = os.path.dirname(os.path.abspath(__file__))
 parent_directory = os.path.dirname(current_directory)
-#folder = os.path.join(current_directory,"data","Chessboard")
-folder = os.path.join(current_directory,"data")
+folder = os.path.join(parent_directory,"data")
 folder = folder.replace("\\", "/") + "/"
+print(folder)
 for filename in glob.glob(folder+ "*.jpg"):
     print(filename)
     imgs_path.append(filename)
