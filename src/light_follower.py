@@ -51,9 +51,7 @@ if __name__ == "__main__":
         circle_found = False
         triangle_found = False
         while not circle_found and not triangle_found:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            frame = cap.capture_array()
             frame = cv2.flip(frame, 1)
 
             new_frame_time = time.time()
@@ -97,9 +95,7 @@ if __name__ == "__main__":
         valid_shape = False
 
         while not stop_detection:
-            ret, frame = cap.read()
-            if not ret:
-                break
+            frame = cap.capture_array()
             frame = cv2.flip(frame, 1)
 
             new_frame_time = time.time()
