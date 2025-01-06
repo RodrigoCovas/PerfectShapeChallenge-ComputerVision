@@ -23,6 +23,10 @@ if __name__ == "__main__":
     cap.configure(config)
     cap.start()
 
+    # Initialize VideoWriter to save the video
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Using XVID codec
+    out = cv2.VideoWriter('output_video.avi', fourcc, 30.0, (1280, 720))  # 30 FPS, 1280x720 resolution
+
     stop_detection = False
     prev_frame_time = 0
     new_frame_time = 0
@@ -36,7 +40,10 @@ if __name__ == "__main__":
         new_frame_time = time.time()
         fps = 1 / (new_frame_time - prev_frame_time) if new_frame_time != prev_frame_time else 0
         prev_frame_time = new_frame_time
-        cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.putText(frame, f"FPS: {fps:.2f}", (1000, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+
+        # Write the current frame to the video file
+        out.write(frame)
 
         if detectar_octogono(frame):
             stop_detection = True
@@ -49,9 +56,7 @@ if __name__ == "__main__":
 
         circle_found = False
         triangle_found = False
-        iter = 0
         while not circle_found and not triangle_found:
-            iter += 1
             frame = cap.capture_array()
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             frame = cv2.flip(frame, 1)
@@ -59,7 +64,7 @@ if __name__ == "__main__":
             new_frame_time = time.time()
             fps = 1 / (new_frame_time - prev_frame_time) if new_frame_time != prev_frame_time else 0
             prev_frame_time = new_frame_time
-            cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(frame, f"FPS: {fps:.2f}", (1000, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
             circle_found = detectar_circulo(frame)
 
@@ -70,13 +75,14 @@ if __name__ == "__main__":
                 break
 
             cv2.imshow('Seguimiento de Luz', frame)
+            out.write(frame)  # Write frame to video
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
         if not stop_detection:
             # Mostrar cuenta atrás antes de iniciar el seguimiento
-            for i in range(3, 0, -1):
+            for i in range(4, 0, -1):
                 for j in range(10):
                     frame = cap.capture_array()
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -85,10 +91,11 @@ if __name__ == "__main__":
                     new_frame_time = time.time()
                     fps = 1 / (new_frame_time - prev_frame_time) if new_frame_time != prev_frame_time else 0
                     prev_frame_time = new_frame_time
-                    cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    cv2.putText(frame, f"FPS: {fps:.2f}", (1000, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
-                    cv2.putText(frame, f"Comienza en {i}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                    cv2.putText(frame, f"Comienza en {i}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     cv2.imshow('Seguimiento de Luz', frame)
+                    out.write(frame)  # Write frame to video
                     cv2.waitKey(100)
 
         show_similarity_score = False
@@ -104,7 +111,8 @@ if __name__ == "__main__":
             new_frame_time = time.time()
             fps = 1 / (new_frame_time - prev_frame_time) if new_frame_time != prev_frame_time else 0
             prev_frame_time = new_frame_time
-            cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(frame, f"FPS: {fps:.2f}", (1000, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+
 
             if show_similarity_score:
                 elapsed_display_time = time.time() - score_display_start_time
@@ -144,7 +152,7 @@ if __name__ == "__main__":
 
                 cv2.circle(frame, (predicted_x, predicted_y), 10, (255, 0, 0), 2)
                 elapsed_time = time.time() - start_time if tracking_started else 0
-                cv2.putText(frame, f"Tiempo transcurrido: {elapsed_time:.2f} s", (50, 100),
+                cv2.putText(frame, f"Tiempo transcurrido: {elapsed_time:.2f} s", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
             if tracking_started and elapsed_time > 1:
@@ -182,6 +190,7 @@ if __name__ == "__main__":
                                 show_similarity_score = True
                                 score_display_start_time = time.time()
                                 valid_shape = True
+                                # plot_circulo(tracking_positions, puntos_circulo, puntos_unidos)
                     elif triangle_found:
                         vertices = ajustar_triangulo(tracking_positions)
                         if euclidean_distance(vertices[0], vertices[1]) < 50:
@@ -191,24 +200,22 @@ if __name__ == "__main__":
                             score_display_start_time = time.time()
                         else:
                             if not show_similarity_score:
-                                puntos_triangulo = generar_puntos_triangulo(vertices, tracking_positions)
-                                semejanza, puntos_unidos = calcular_semejanza_triangulo(tracking_positions, puntos_triangulo, vertices)
+                                puntos_triangulo = generar_puntos_triangulo(vertices, len(tracking_positions))
+                                semejanza, puntos_unidos = calcular_semejanza_triangulo(tracking_positions, puntos_triangulo)
                                 print("Semejanza:", semejanza)
 
                                 similarity_score = semejanza
                                 show_similarity_score = True
                                 score_display_start_time = time.time()
                                 valid_shape = True
-
+                                #plot_triangulo(tracking_positions, puntos_triangulo, puntos_unidos)
             cv2.imshow('Seguimiento de Luz', frame)
+            out.write(frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            #if valid_shape:
-                #if circle_found:
-                    #plot_circulo(tracking_positions, puntos_circulo, puntos_unidos)
-                #elif triangle_found:
-                    #plot_triangulo(tracking_positions, puntos_triangulo, puntos_unidos)
-
+    
+    time.sleep(3)
     cap.stop()
+    out.release()
     cv2.destroyAllWindows()
