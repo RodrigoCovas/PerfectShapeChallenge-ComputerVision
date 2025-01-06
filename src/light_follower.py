@@ -29,9 +29,8 @@ if __name__ == "__main__":
 
     while not stop_detection:
 
-        ret, frame = cap.read()
-        if not ret:
-            break
+        frame = cap.capture_array()
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         frame = cv2.flip(frame, 1)
 
         new_frame_time = time.time()
@@ -50,8 +49,11 @@ if __name__ == "__main__":
 
         circle_found = False
         triangle_found = False
+        iter = 0
         while not circle_found and not triangle_found:
+            iter += 1
             frame = cap.capture_array()
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             frame = cv2.flip(frame, 1)
 
             new_frame_time = time.time()
@@ -60,6 +62,7 @@ if __name__ == "__main__":
             cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
             circle_found = detectar_circulo(frame)
+
             triangle_found = detectar_triangulo(frame)
 
             if detectar_octogono(frame):
@@ -75,9 +78,8 @@ if __name__ == "__main__":
             # Mostrar cuenta atrás antes de iniciar el seguimiento
             for i in range(3, 0, -1):
                 for j in range(10):
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
+                    frame = cap.capture_array()
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                     frame = cv2.flip(frame, 1)  # Invertir la imagen
 
                     new_frame_time = time.time()
@@ -96,6 +98,7 @@ if __name__ == "__main__":
 
         while not stop_detection:
             frame = cap.capture_array()
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             frame = cv2.flip(frame, 1)
 
             new_frame_time = time.time()
@@ -201,11 +204,11 @@ if __name__ == "__main__":
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            if valid_shape:
-                if circle_found:
-                    plot_circulo(tracking_positions, puntos_circulo, puntos_unidos)
-                elif triangle_found:
-                    plot_triangulo(tracking_positions, puntos_triangulo, puntos_unidos)
+            #if valid_shape:
+                #if circle_found:
+                    #plot_circulo(tracking_positions, puntos_circulo, puntos_unidos)
+                #elif triangle_found:
+                    #plot_triangulo(tracking_positions, puntos_triangulo, puntos_unidos)
 
-    cap.release()
+    cap.stop()
     cv2.destroyAllWindows()

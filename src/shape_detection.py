@@ -21,24 +21,28 @@ def detect_bright_object(frame):
     return None
 
 def detectar_circulo(imagen):
-    imagen_gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)  # Convertir a escala de grises
+    scale_factor = 0.5  
+    imagen_resized = cv2.resize(imagen, None, fx=scale_factor, fy=scale_factor)
 
-    imagen_gris = cv2.GaussianBlur(imagen_gris, (9, 9), 2)
+    imagen_gris = cv2.cvtColor(imagen_resized, cv2.COLOR_BGR2GRAY)
+
+    imagen_gris = cv2.medianBlur(imagen_gris, 5) 
 
     circulos = cv2.HoughCircles(
         imagen_gris,
         cv2.HOUGH_GRADIENT,
         dp=1,
-        minDist=100,
-        param1=50,
-        param2=100,
-        minRadius=10,
-        maxRadius=10000
+        minDist=50, 
+        param1=50,   
+        param2=80,   
+        minRadius=30,
+        maxRadius=100  
     )
 
     if circulos is not None:
         return True
     return False
+
 
 def calcular_angulos(vertices):
     angulos = []
