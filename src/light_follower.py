@@ -5,7 +5,6 @@ from picamera2 import Picamera2, Preview
 from shape_adjustment import ajustar_circulo, ajustar_triangulo, generar_puntos_circulo, generar_puntos_triangulo, plot_circulo, plot_triangulo, euclidean_distance, calcular_semejanza_circulo, generar_puntos_triangulo, calcular_semejanza_triangulo
 from shape_detection import detectar_circulo, detectar_triangulo, detectar_octogono, detect_bright_object
 
-
 if __name__ == "__main__":
     # Inicializar el filtro de Kalman
     kalman = cv2.KalmanFilter(4, 2)
@@ -23,37 +22,41 @@ if __name__ == "__main__":
     cap.configure(config)
     cap.start()
 
-    # Initialize VideoWriter to save the video
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')  # Using XVID codec
-    out = cv2.VideoWriter('output_video.avi', fourcc, 30.0, (1280, 720))  # 30 FPS, 1280x720 resolution
+    # Inicializar el video de salida
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('output_video.avi', fourcc, 30.0, (1280, 720))  # 30 FPS, 720p
 
-    stop_detection = False
+    stop_detection = False # Parar la detección si se detecta un octógono rojo
+    # Inicializar variables para el cálculo de FPS
     prev_frame_time = 0
     new_frame_time = 0
 
     while not stop_detection:
 
         frame = cap.capture_array()
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        frame = cv2.flip(frame, 1)
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR) # Convertir de RGB a BGR porque OpenCV usa BGR
+        frame = cv2.flip(frame, 1) # Invertir la imagen para que no se vea al revés
 
+        # Calcular FPS
         new_frame_time = time.time()
         fps = 1 / (new_frame_time - prev_frame_time) if new_frame_time != prev_frame_time else 0
         prev_frame_time = new_frame_time
         cv2.putText(frame, f"FPS: {fps:.2f}", (1000, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
-        # Write the current frame to the video file
+        # Guardar el frame en el video de salida
         out.write(frame)
 
         if detectar_octogono(frame):
             stop_detection = True
             break
-
+        
+        # Iniciar variables para el seguimiento
         tracking_positions = []
         tracking_started = False
         start_time = None
         initial_position = None
 
+        # Iniciar variables para elegir modo de juego
         circle_found = False
         triangle_found = False
         while not circle_found and not triangle_found:
@@ -75,7 +78,7 @@ if __name__ == "__main__":
                 break
 
             cv2.imshow('Seguimiento de Luz', frame)
-            out.write(frame)  # Write frame to video
+            out.write(frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -86,7 +89,7 @@ if __name__ == "__main__":
                 for j in range(10):
                     frame = cap.capture_array()
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                    frame = cv2.flip(frame, 1)  # Invertir la imagen
+                    frame = cv2.flip(frame, 1)
 
                     new_frame_time = time.time()
                     fps = 1 / (new_frame_time - prev_frame_time) if new_frame_time != prev_frame_time else 0
@@ -95,9 +98,10 @@ if __name__ == "__main__":
 
                     cv2.putText(frame, f"Comienza en {i}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
                     cv2.imshow('Seguimiento de Luz', frame)
-                    out.write(frame)  # Write frame to video
+                    out.write(frame)
                     cv2.waitKey(100)
 
+        # Iniciar variables para mostrar la semejanza por pantalla
         show_similarity_score = False
         similarity_score = None
         score_display_start_time = None
@@ -117,18 +121,22 @@ if __name__ == "__main__":
             if show_similarity_score:
                 elapsed_display_time = time.time() - score_display_start_time
                 elapsed_time = 0
+                # Mostrar la semejanza por pantalla durante 5 segundos
                 if elapsed_display_time < 5:
                     if valid_shape:
                         cv2.putText(frame, f"Semejanza: {similarity_score:.2f}", (50, 50),
                                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                     else:
+                        # Si la forma no es válida, mostrar mensaje de error
                         cv2.putText(frame, "Forma incorrecta. Intente de nuevo.", (50, 50),
                                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 else:
+                    # Resetear variables
                     show_similarity_score = False
                     valid_shape = False
                     break
             else:
+                # Detectar la posición del objeto brillante
                 detected = detect_bright_object(frame)
                 if detected:
                     measured = np.array([[np.float32(detected[0])], [np.float32(detected[1])]])
@@ -215,7 +223,7 @@ if __name__ == "__main__":
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     
-    time.sleep(3)
+    # Liberar recursos
     cap.stop()
     out.release()
     cv2.destroyAllWindows()

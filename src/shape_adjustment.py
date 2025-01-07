@@ -119,7 +119,7 @@ def calcular_semejanza_circulo(puntos_originales, puntos_circulo, radio):
         if len(puntos_unidos[punto_cercano]) == 2:
             puntos_disponibles.remove(punto_cercano)
 
-    #Elevamos las distancias al cuadrado
+    #Elevamos las distancias al cubo para penalizar más las distancias grandes
     distancias = [distancia**3 for distancia in distancias]
     media_distancia = np.mean(distancias)
 

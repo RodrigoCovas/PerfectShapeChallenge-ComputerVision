@@ -21,11 +21,13 @@ def detect_bright_object(frame):
     return None
 
 def detectar_circulo(imagen):
+    # Ocupa menos memoria que la imagen original y se mantienen mejor los FPS
     scale_factor = 0.5  
     imagen_resized = cv2.resize(imagen, None, fx=scale_factor, fy=scale_factor)
 
     imagen_gris = cv2.cvtColor(imagen_resized, cv2.COLOR_BGR2GRAY)
 
+    # Ocupa menos memoria que cv2.GaussianBlur y se mantienen mejor los FPS
     imagen_gris = cv2.medianBlur(imagen_gris, 5) 
 
     circulos = cv2.HoughCircles(
@@ -69,6 +71,7 @@ def aplicar_red_mask(imagen):
 
     hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
 
+    # Hay dos rangos de hue para el color rojo
     lower_red1 = np.array([0, 40, 40])
     upper_red1 = np.array([20, 255, 255])
     lower_red2 = np.array([160, 40, 40])
