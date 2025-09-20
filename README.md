@@ -1,4 +1,8 @@
-# Lab-Project-Computer-Vision
+# Perfect Shape Challenge - Computer Vision
+## Description:
+This project is a computer vision adaptation of the Neal.fun Draw a Perfect Circle Game. When a player shows a shape to the camera, a countdown begins and they have to draw the shape using a bright object (e.g. flashlight) in a limited time span. The game will calculate a similarity score. Everything was done on a Raspberry Pi 4 and there is a Demo Video showing the results and all possible failure scenarios.
+
+
 ## Camera Calibration:
 ### Intrinsics:
  [[1.47111529e+03 0.00000000e+00 6.74519617e+02]
